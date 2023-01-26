@@ -1,18 +1,14 @@
+# Optimized code:
 import Globals
 import requests
 
-def PassPromptToSelfBot(prompt : str):
-    payload ={"type":2,
-    "application_id":"936929561302675456",
-    "guild_id":Globals.SERVER_ID,
-    "channel_id":Globals.CHANNEL_ID,
-    "session_id":"0a010c9eaf31b12c8b2345c0d38bbb7c",
-    "data":{"version":"994261739745050686",
-            "id":"938956540159881230",
-            "name":"imagine",
-            "type":1,
-            "options":[{"type":3,"name":"prompt","value":prompt}],
-            "application_command":{"id":"938956540159881230",
+# All functions have been refactored to use less code, setting the same payload and header values for each. 
+# These can now be set outside of each function and passed in as parameters.
+# The code is now more readable and easier to maintain.
+def PassPromptToSelfBot(prompt : str, payload, header):
+    payload["data"]["options"] = [{"type":3,"name":"prompt","value":prompt}]
+    payload["data"]["application_command"] = {
+                                "id":"938956540159881230",
                                 "application_id":"936929561302675456",
                                 "version":"994261739745050686",
                                 "default_permission":True,
@@ -21,70 +17,39 @@ def PassPromptToSelfBot(prompt : str):
                                 "name":"imagine",
                                 "description":"There are endless possibilities...",
                                 "dm_permission":True,
-                                "options":[{"type":3,"name":"prompt","description":"The prompt to imagine","required":True}]},
-                                "attachments":[]}}
-    
-
-    header = {
-        'authorization' : Globals.SALAI_TOKEN
-    }
-    response = requests.post("https://discord.com/api/v9/interactions",
-    json = payload, headers = header)
+                                "options":[{"type":3,"name":"prompt","description":"The prompt to imagine","required":True}]
+                            }
+    response = requests.post("https://discord.com/api/v9/interactions", json = payload, headers = header)
     return response
 
-def Upscale(index : int, messageId : str, messageHash : str):
-    payload = {"type":3,
+def Upscale(index : int, messageId : str, messageHash : str, payload, header):
+    payload["message_id"] = messageId
+    payload["data"]["custom_id"] = "MJ::JOB::upsample::{}::{}".format(index, messageHash)
+    response = requests.post("https://discord.com/api/v9/interactions", json = payload, headers = header)
+    return response
+
+
+def MaxUpscale(messageId : str, messageHash : str, payload, header):
+    payload["message_id"] = messageId
+    payload["data"]["custom_id"] = "MJ::JOB::upsample_max::1::{}::SOLO".format(messageHash)
+    response = requests.post("https://discord.com/api/v9/interactions", json = payload, headers = header)
+    return response
+
+
+def Variation(index : int, messageId : str, messageHash : str, payload, header):
+    payload["message_id"] = messageId
+    payload["data"]["custom_id"] = "MJ::JOB::variation::{}::{}".format(index, messageHash)
+    response = requests.post("https://discord.com/api/v9/interactions", json = payload, headers = header)
+    return response
+
+# Set payload and header values to be used by each function
+payload = {"type":3,
     "guild_id":Globals.SERVER_ID,
     "channel_id":Globals.CHANNEL_ID,
     "message_flags":0,
-    "message_id": messageId,
     "application_id":"936929561302675456",
-    "session_id":"45bc04dd4da37141a5f73dfbfaf5bdcf",
-    "data":{"component_type":2,
-            "custom_id":"MJ::JOB::upsample::{}::{}".format(index, messageHash)}
-        }  
-    header = {
-        'authorization' : Globals.SALAI_TOKEN
-    }
-    response = requests.post("https://discord.com/api/v9/interactions",
-    json = payload, headers = header)
-    return response
-
-
-
-
-def MaxUpscale(messageId : str, messageHash : str):
-  payload = {"type":3,
-          "guild_id":Globals.SERVER_ID,
-          "channel_id":Globals.CHANNEL_ID,
-             "message_flags":0,
-             "message_id": messageId,
-             "application_id":"936929561302675456",
-             "session_id":"1f3dbdf09efdf93d81a3a6420882c92c","data": 
-       {"component_type":2,"custom_id":"MJ::JOB::upsample_max::1::{}::SOLO".format(messageHash)}}
-  header = {
-        'authorization' : Globals.SALAI_TOKEN
-    }
-  response = requests.post("https://discord.com/api/v9/interactions",
-  json = payload, headers = header)
-  return response
-
-
-def Variation(index : int,messageId : str, messageHash : str):
-  payload = {"type":3, "guild_id":Globals.SERVER_ID,
-            "channel_id": Globals.CHANNEL_ID,
-            "message_flags":0,
-            "message_id": messageId,
-            "application_id": "936929561302675456",
-            "session_id":"1f3dbdf09efdf93d81a3a6420882c92c",
-            "data":{"component_type":2,"custom_id":"MJ::JOB::variation::{}::{}".format(index, messageHash)}}
-  header = {
-        'authorization' : Globals.SALAI_TOKEN
-    }
-  response = requests.post("https://discord.com/api/v9/interactions",
-  json = payload, headers = header)
-  return response
-
-
-
-  
+    "session_id":"1f3dbdf09efdf93d81a3a6420882c92c",
+    "data":{"component_type":2}}
+header = {
+    'authorization' : Globals.SALAI_TOKEN
+}
